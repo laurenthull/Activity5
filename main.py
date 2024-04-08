@@ -21,8 +21,9 @@ class PizzaOrderApp:
 
         # Fetch sizes from the database
         self.size_options = self.get_db_options("PizzaSizes", "SizeName")
-        self.size_option_menu = tk.OptionMenu(master, self.size_var, *self.size_options)
-        self.size_option_menu.grid(row=0, column=1, sticky="w")
+        for i, size in enumerate(self.size_options):
+            btn = tk.Button(master, text=size, command=lambda s=size: self.size_var.set(s))
+            btn.grid(row=0, column=i+1, sticky="w")
 
         # Toppings
         topping_label = tk.Label(master, text="Select Toppings:")
@@ -38,12 +39,13 @@ class PizzaOrderApp:
 
         # Pizza style
         style_label = tk.Label(master, text="Select Style:")
-        style_label.grid(row=len(self.topping_options) + 1, column=0, sticky="w")
+        style_label.grid(row=len(self.topping_options) + 2, column=0, sticky="w")
 
         # Fetch styles from the database
         self.style_options = self.get_db_options("PizzaStyles", "StyleName")
-        self.style_option_menu = tk.OptionMenu(master, self.style_var, *self.style_options)
-        self.style_option_menu.grid(row=len(self.topping_options) + 1, column=1, sticky="w")
+        for i, style in enumerate(self.style_options):
+            btn = tk.Button(master, text=style, command=lambda s=style: self.style_var.set(s))
+            btn.grid(row=len(self.topping_options) + 2, column=i+1, sticky="w")
 
         # Crust type
         crust_label = tk.Label(master, text="Select Crust:")
@@ -51,8 +53,9 @@ class PizzaOrderApp:
 
         # Fetch crusts from the database
         self.crust_options = self.get_db_options("CrustTypes", "CrustName")
-        self.crust_option_menu = tk.OptionMenu(master, self.crust_var, *self.crust_options)
-        self.crust_option_menu.grid(row=len(self.topping_options) + 2, column=1, sticky="w")
+        for i, crust in enumerate(self.crust_options):
+            btn = tk.Button(master, text=crust, command=lambda c=crust: self.crust_var.set(c))
+            btn.grid(row=len(self.topping_options) + 3, column=i+1, sticky="w")
 
         # Quantity
         quantity_label = tk.Label(master, text="Quantity:")
@@ -73,9 +76,15 @@ class PizzaOrderApp:
     def get_price(self, table, price_column, condition_column, condition_value):
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT {price_column} FROM {table} WHERE {condition_column} = %s", (condition_value,))
-        price = cursor.fetchone()[0]
-        cursor.close()
-        return price
+        result = cursor.fetchone()
+        if result is not None:
+            price = result[0]
+            cursor.close()
+            return price
+        else:
+            cursor.close()
+            return 0
+
 
     def place_order(self):
         # Get selected options
@@ -149,8 +158,8 @@ if __name__ == "__main__":
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="SQlt20043",
-        database="Pizza"
+        password="cytyttyn2",
+        database="Pizza"  # Change this to your database name
     )
 
     root = tk.Tk()
