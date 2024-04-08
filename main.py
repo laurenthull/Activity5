@@ -150,7 +150,7 @@ if __name__ == "__main__":
         host="localhost",
         user="root",
         password="SQlt20043",
-        database="Pizza"  # Change this to your database name
+        database="Pizza"
     )
 
     root = tk.Tk()
