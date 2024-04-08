@@ -9,64 +9,72 @@ class PizzaOrderApp:
         self.connection = connection
         self.master.title("Pizza Ordering System")
 
+        self.master.attributes('-fullscreen', True)
+
         self.size_var = tk.StringVar()
         self.topping_vars = []
         self.style_var = tk.StringVar()
         self.crust_var = tk.StringVar()
         self.quantity_var = tk.IntVar(value=1)
 
+        # Configure rows and columns to expand
+        for i in range(6):  # Assuming 6 rows are being used
+            master.grid_rowconfigure(i, weight=1)
+        for i in range(6):  # Assuming 6 columns are being used
+            master.grid_columnconfigure(i, weight=1)
+
         # Pizza size
-        size_label = tk.Label(master, text="Select Size:")
+        size_label = tk.Label(master, text="Select Size:", font=("Helvetica", 16))
         size_label.grid(row=0, column=0, sticky="w")
 
         # Fetch sizes from the database
         self.size_options = self.get_db_options("PizzaSizes", "SizeName")
         for i, size in enumerate(self.size_options):
-            btn = tk.Button(master, text=size, command=lambda s=size: self.size_var.set(s))
+            btn = tk.Button(master, text=size, font=("Helvetica", 16), command=lambda s=size: self.size_var.set(s), width=20, height=5)
             btn.grid(row=0, column=i+1, sticky="w")
 
         # Toppings
-        topping_label = tk.Label(master, text="Select Toppings:")
+        topping_label = tk.Label(master, text="Select Toppings:", font=("Helvetica", 16))
         topping_label.grid(row=1, column=0, sticky="w")
 
         # Fetch toppings from the database
         self.topping_options = self.get_db_options("Toppings", "ToppingName")
         for i, option in enumerate(self.topping_options):
             var = tk.IntVar(value=0)
-            cb = tk.Checkbutton(master, text=option, variable=var)
+            cb = tk.Checkbutton(master, text=option, font=("Helvetica", 16), variable=var)
             cb.grid(row=i + 1, column=1, sticky="w")
             self.topping_vars.append(var)
 
         # Pizza style
-        style_label = tk.Label(master, text="Select Style:")
+        style_label = tk.Label(master, text="Select Style:", font=("Helvetica", 16))
         style_label.grid(row=len(self.topping_options) + 2, column=0, sticky="w")
 
         # Fetch styles from the database
         self.style_options = self.get_db_options("PizzaStyles", "StyleName")
         for i, style in enumerate(self.style_options):
-            btn = tk.Button(master, text=style, command=lambda s=style: self.style_var.set(s))
+            btn = tk.Button(master, text=style, font=("Helvetica", 16), command=lambda s=style: self.style_var.set(s), width=20, height=5)
             btn.grid(row=len(self.topping_options) + 2, column=i+1, sticky="w")
 
         # Crust type
-        crust_label = tk.Label(master, text="Select Crust:")
-        crust_label.grid(row=len(self.topping_options) + 2, column=0, sticky="w")
+        crust_label = tk.Label(master, text="Select Crust:", font=("Helvetica", 16))
+        crust_label.grid(row=len(self.topping_options) + 3, column=0, sticky="w")
 
         # Fetch crusts from the database
         self.crust_options = self.get_db_options("CrustTypes", "CrustName")
         for i, crust in enumerate(self.crust_options):
-            btn = tk.Button(master, text=crust, command=lambda c=crust: self.crust_var.set(c))
+            btn = tk.Button(master, text=crust, font=("Helvetica", 16), command=lambda c=crust: self.crust_var.set(c), width=20, height=5)
             btn.grid(row=len(self.topping_options) + 3, column=i+1, sticky="w")
 
         # Quantity
-        quantity_label = tk.Label(master, text="Quantity:")
-        quantity_label.grid(row=len(self.topping_options) + 3, column=0, sticky="w")
+        quantity_label = tk.Label(master, text="Quantity:", font=("Helvetica", 16))
+        quantity_label.grid(row=len(self.topping_options) + 4, column=0, sticky="w")
 
-        self.quantity_entry = tk.Entry(master, textvariable=self.quantity_var)
-        self.quantity_entry.grid(row=len(self.topping_options) + 3, column=1, sticky="w")
+        self.quantity_entry = tk.Spinbox(master, textvariable=self.quantity_var, width=5,font=("Helvetica", 25), from_ = 0, to = 50)
+        self.quantity_entry.grid(row=len(self.topping_options) + 4, column=1, sticky="w")
 
         # Order button
-        order_button = tk.Button(master, text="Place Order", command=self.place_order)
-        order_button.grid(row=len(self.topping_options) + 4, columnspan=2, pady=10)
+        order_button = tk.Button(master, text="Place Order", font=("Helvetica", 16), command=self.place_order, bg='red')
+        order_button.grid(row=len(self.topping_options) + 4, column=5, pady=10)
 
     def get_db_options(self, table, column):
         cursor = self.connection.cursor()
@@ -158,7 +166,7 @@ if __name__ == "__main__":
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="cytyttyn2",
+        password="SQlt20043",
         database="Pizza"  # Change this to your database name
     )
 
