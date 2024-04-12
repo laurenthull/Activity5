@@ -18,6 +18,9 @@ class PizzaOrderApp:
         self.crust_var = tk.StringVar()
         self.quantity_var = tk.IntVar(value=1)
 
+        # Add selected_items_text attribute
+        self.selected_items_text = tk.StringVar()
+
         # Configure rows and columns to expand
         for i in range(6):  # Assuming 6 rows are being used
             master.grid_rowconfigure(i, weight=1)
@@ -85,6 +88,14 @@ class PizzaOrderApp:
         order_button = tk.Button(master, text="Place Order", font=("Helvetica", 16), command=self.place_order, bg='red')
         order_button.grid(row=len(self.size_options) + 4, column=5, pady=10)
 
+        # Selected items label
+        self.selected_items_label = tk.Label(master, text="Selected Items:", font=("Helvetica", 16))
+        self.selected_items_label.grid(row=len(self.size_options) + 6, column=0, columnspan=6, sticky="w")
+
+        # Selected items display
+        self.selected_items_display = tk.Label(master, textvariable=self.selected_items_text, font=("Helvetica", 12), wraplength=600, justify="left")
+        self.selected_items_display.grid(row=len(self.size_options) + 7, column=0, columnspan=6, sticky="w")
+
     def get_db_options(self, table, column):
         cursor = self.connection.cursor()
         cursor.execute(f"SELECT {column} FROM {table}")
@@ -110,6 +121,7 @@ class PizzaOrderApp:
         elif option_type == "crust":
             self.crust_var.set(value)
         self.calculate_total()
+        self.update_selected_items()
 
     def calculate_total(self):
         size_price = self.get_price("PizzaSizes", "Price", "SizeName", self.size_var.get())
@@ -195,6 +207,15 @@ class PizzaOrderApp:
         total_price = (size_price + topping_prices + style_price + crust_price) * self.quantity_var.get()
         self.sale_price = Decimal(total_price) * Decimal('0.85')
         self.total_price_label.config(text="Total Price: $%.2f" % self.sale_price)
+
+    def update_selected_items(self):
+        size = self.size_var.get()
+        toppings = [self.topping_options[i] for i, var in enumerate(self.topping_vars) if var.get() == 1]
+        style = self.style_var.get()
+        crust = self.crust_var.get()
+
+        selected_items = f"Size: {size}\nToppings: {', '.join(toppings)}\nStyle: {style}\nCrust: {crust}"
+        self.selected_items_text.set(selected_items)
 
 if __name__ == "__main__":
     # Creating connection object
