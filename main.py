@@ -31,7 +31,7 @@ class PizzaOrderApp:
         # Fetch sizes from the database
         self.size_options = self.get_db_options("PizzaSizes", "SizeName")
         for i, size in enumerate(self.size_options):
-            btn = tk.Button(master, text=size, font=("Helvetica", 16), command=lambda s=size: self.size_var.set(s), width=20, height=5)
+            btn = tk.Button(master, text=size, font=("Helvetica", 16), command=lambda s=size: self.select_option("size", s), width=20, height=5)
             btn.grid(row=0, column=i+1, sticky="w")
 
         # Toppings
@@ -42,7 +42,7 @@ class PizzaOrderApp:
         self.topping_options = self.get_db_options("Toppings", "ToppingName")
         for i, option in enumerate(self.topping_options):
             var = tk.IntVar(value=0)
-            cb = tk.Checkbutton(master, text=option, font=("Helvetica", 16), variable=var)
+            cb = tk.Checkbutton(master, text=option, font=("Helvetica", 16), variable=var, command=lambda var=var: self.calculate_total())
             cb.grid(row=i + 1, column=1, sticky="w")
             self.topping_vars.append(var)
 
@@ -53,7 +53,7 @@ class PizzaOrderApp:
         # Fetch styles from the database
         self.style_options = self.get_db_options("PizzaStyles", "StyleName")
         for i, style in enumerate(self.style_options):
-            btn = tk.Button(master, text=style, font=("Helvetica", 16), command=lambda s=style: self.style_var.set(s), width=20, height=5)
+            btn = tk.Button(master, text=style, font=("Helvetica", 16), command=lambda s=style: self.select_option("style", s), width=20, height=5)
             btn.grid(row=len(self.size_options) + 2, column=i+1, sticky="w")
 
         # Crust type
@@ -63,14 +63,14 @@ class PizzaOrderApp:
         # Fetch crusts from the database
         self.crust_options = self.get_db_options("CrustTypes", "CrustName")
         for i, crust in enumerate(self.crust_options):
-            btn = tk.Button(master, text=crust, font=("Helvetica", 16), command=lambda c=crust: self.crust_var.set(c), width=20, height=5)
+            btn = tk.Button(master, text=crust, font=("Helvetica", 16), command=lambda c=crust: self.select_option("crust", c), width=20, height=5)
             btn.grid(row=len(self.size_options) + 3, column=i+1, sticky="w")
 
         # Quantity
         quantity_label = tk.Label(master, text="Quantity:", font=("Helvetica", 16))
         quantity_label.grid(row=len(self.size_options) + 4, column=0, sticky="w")
 
-        self.quantity_entry = tk.Spinbox(master, textvariable=self.quantity_var, width=5,font=("Helvetica", 25), from_ = 0, to = 50)
+        self.quantity_entry = tk.Spinbox(master, textvariable=self.quantity_var, width=5,font=("Helvetica", 25), from_ = 0, to = 50, command=self.calculate_total)
         self.quantity_entry.grid(row=len(self.size_options) + 4, column=1, sticky="w")
 
         # Total price label
@@ -102,6 +102,22 @@ class PizzaOrderApp:
             cursor.close()
             return 0
 
+    def select_option(self, option_type, value):
+        if option_type == "size":
+            self.size_var.set(value)
+        elif option_type == "style":
+            self.style_var.set(value)
+        elif option_type == "crust":
+            self.crust_var.set(value)
+        self.calculate_total()
+
+    def calculate_total(self):
+        size_price = self.get_price("PizzaSizes", "Price", "SizeName", self.size_var.get())
+        topping_prices = sum(self.get_price("Toppings", "Price", "ToppingName", self.topping_options[i]) for i, var in enumerate(self.topping_vars) if var.get() == 1)
+        style_price = self.get_price("PizzaStyles", "Price", "StyleName", self.style_var.get())
+        crust_price = self.get_price("CrustTypes", "Price", "CrustName", self.crust_var.get())
+        total_price = (size_price + topping_prices + style_price + crust_price) * self.quantity_var.get()
+        self.total_price_label.config(text="Total Price: $%.2f" % total_price)
 
     def place_order(self):
         # Get selected options
@@ -117,11 +133,8 @@ class PizzaOrderApp:
         style_price = self.get_price("PizzaStyles", "Price", "StyleName", style)
         crust_price = self.get_price("CrustTypes", "Price", "CrustName", crust)
 
-        # If sale price is not calculated yet, use regular price
-        if hasattr(self, 'sale_price'):
-            total_price = self.sale_price
-        else:
-            total_price = (size_price + topping_prices + style_price + crust_price) * quantity
+        # Calculate total price
+        total_price = (size_price + topping_prices + style_price + crust_price) * quantity
 
         # Insert the pizza into the Pizzas table
         pizza_id = self.insert_pizza(size, toppings, style, crust)
@@ -174,7 +187,7 @@ class PizzaOrderApp:
         return pizza_id
 
     def apply_sale_price(self):
-    # Calculate sale price (15% off regular price)
+        # Calculate sale price (15% off regular price)
         size_price = self.get_price("PizzaSizes", "Price", "SizeName", self.size_var.get())
         topping_prices = sum(self.get_price("Toppings", "Price", "ToppingName", self.topping_options[i]) for i, var in enumerate(self.topping_vars) if var.get() == 1)
         style_price = self.get_price("PizzaStyles", "Price", "StyleName", self.style_var.get())
