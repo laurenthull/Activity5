@@ -18,14 +18,19 @@ class PizzaOrderApp:
         self.style_var = tk.StringVar()
         self.crust_var = tk.StringVar()
         self.quantity_var = tk.IntVar(value=1)
+        self.cart_items = []  # List to store cart items
+
+
 
         # Add selected_items_text attribute
         self.selected_items_text = tk.StringVar()
 
+        # Add Cart Text
+        self.cart_items_text = tk.StringVar()
+
         root.configure(bg="white")
 
-
-
+        # Add to Cart button
 
 
         # Configure rows and columns to expand
@@ -142,6 +147,10 @@ class PizzaOrderApp:
         order_button = tk.Button(master, text="Place Order", font=("Helvetica", 16), command=self.place_order)
         order_button.grid(row=len(self.size_options) + 4, column=5, pady=10)
 
+        # add to cart button
+        add_to_cart_button = tk.Button(master, text="Add to Cart", font=("Helvetica", 16), command=self.add_to_cart)
+        add_to_cart_button.grid(row=len(self.size_options) + 4, column=4, pady=10)
+
         # Selected items label
         self.selected_items_label = tk.Label(master, bg="white",text="Your Order:", font=("Helvetica", 16))
         self.selected_items_label.grid(row=len(self.size_options) + 6, column=0, columnspan=6, sticky="w",padx=25)
@@ -149,6 +158,15 @@ class PizzaOrderApp:
         # Selected items display
         self.selected_items_display = tk.Label(master, textvariable=self.selected_items_text, font=("Helvetica", 16), wraplength=600, justify="left")
         self.selected_items_display.grid(row=len(self.size_options) + 7, column=0, columnspan=6, sticky="w",padx=25, pady=15)
+
+        ######### cart stuff #############
+        #  cart label
+        self.cart = tk.Label(master, bg="white",text="Cart:", font=("Helvetica", 16))
+        self.cart.grid(row=len(self.size_options) + 6, column=2, columnspan=6, sticky="w",padx=25)
+
+        # cart items display
+        self.cart_display = tk.Label(master, textvariable=self.cart_items_text, font=("Helvetica", 16), wraplength=600, justify="left")
+        self.cart_display.grid(row=len(self.size_options) + 7, column=2, columnspan=6, sticky="w",padx=25, pady=15)
 
 
 
@@ -193,42 +211,64 @@ class PizzaOrderApp:
         total_price = (size_price + topping_prices + style_price + crust_price) * self.quantity_var.get()
         self.total_price_label.config(text="Total Price: $%.2f" % total_price)
 
-    def place_order(self):
-        # Get selected options
+    def add_to_cart(self):
         size = self.size_var.get()
         toppings = [self.topping_options[i] for i, var in enumerate(self.topping_vars) if var.get() == 1]
         style = self.style_var.get()
         crust = self.crust_var.get()
         quantity = self.quantity_var.get()
 
-        # Update selected items display
-        selected_items = f"Size: {size}\nToppings: {', '.join(toppings)}\nStyle: {style}\nCrust: {crust}"
-        self.selected_items_text.set(selected_items)
+        # Add current order to cart
+        self.cart_items.append({"Size": size, "Toppings": toppings, "Style": style, "Crust": crust, "Quantity": quantity})
 
-        # Fetch prices for selected options
-        size_price = self.get_price("PizzaSizes", "Price", "SizeName", size)
-        topping_prices = sum(self.get_price("Toppings", "Price", "ToppingName", topping) for topping in toppings)
-        style_price = self.get_price("PizzaStyles", "Price", "StyleName", style)
-        crust_price = self.get_price("CrustTypes", "Price", "CrustName", crust)
+        # Update cart display
+        self.update_cart_display()
 
-        # Calculate total price
-        total_price = (size_price + topping_prices + style_price + crust_price) * quantity
+    def place_order(self):
+        ordered_items = []  # List to store ordered items for display in the popup message
 
-        # Insert the pizza into the Pizzas table
-        pizza_id = self.insert_pizza(size, toppings, style, crust)
+        # Iterate over each item in the cart
+        for item in self.cart_items:
+            size = item["Size"]
+            toppings = item["Toppings"]
+            style = item["Style"]
+            crust = item["Crust"]
+            quantity = item["Quantity"]
 
-        # Generate a unique sale ID
-        sale_id = str(uuid.uuid4())
+            # Fetch prices for selected options
+            size_price = self.get_price("PizzaSizes", "Price", "SizeName", size)
+            topping_prices = sum(self.get_price("Toppings", "Price", "ToppingName", topping) for topping in toppings)
+            style_price = self.get_price("PizzaStyles", "Price", "StyleName", style)
+            crust_price = self.get_price("CrustTypes", "Price", "CrustName", crust)
 
-        # Insert the sale into the Sales table with the total price
-        cursor = self.connection.cursor()
-        cursor.execute(
-            "INSERT INTO Sales (SaleID, PizzaID, Quantity, TotalPrice, SaleDate) VALUES (%s, %s, %s, %s, NOW())",
-            (sale_id, pizza_id, quantity, total_price))
-        self.connection.commit()
-        cursor.close()
-        messagebox.showinfo("Order Placed", f'Your order has been placed.\n{selected_items}.')
+            # Calculate total price for the current item
+            total_price = (size_price + topping_prices + style_price + crust_price) * quantity
+
+            # Insert the pizza into the Pizzas table and get the pizza ID
+            pizza_id = self.insert_pizza(size, toppings, style, crust)
+
+            # Generate a unique sale ID
+            sale_id = str(uuid.uuid4())
+
+            # Insert the sale into the Sales table with the total price
+            cursor = self.connection.cursor()
+            cursor.execute(
+                "INSERT INTO Sales (SaleID, PizzaID, Quantity, TotalPrice, SaleDate) VALUES (%s, %s, %s, %s, NOW())",
+                (sale_id, pizza_id, quantity, total_price))
+            self.connection.commit()
+            cursor.close()
+
+            # Append the current item to the ordered items list for display in the popup message
+            ordered_items.append(
+                f"Size: {size}, Toppings: {', '.join(toppings)}, Style: {style}, Crust: {crust}, Quantity: {quantity}")
+
+        # Display the ordered items in the popup message
+        messagebox.showinfo("Order Placed", "\n".join(ordered_items))
+
+        # Reset UI and cart items list
         self.reset_ui()
+        self.cart_items = []
+        self.update_cart_display()
 
     def insert_pizza(self, size, toppings, style, crust):
         cursor = self.connection.cursor()
@@ -284,6 +324,15 @@ class PizzaOrderApp:
         selected_items = f"Size: {size}\nToppings: {', '.join(toppings)}\nStyle: {style}\nCrust: {crust}"
         self.selected_items_text.set(selected_items)
 
+    #######cart function##############
+    def update_cart_display(self):
+        # Display items in the cart
+        cart_display_text = ""
+        for item in self.cart_items:
+            cart_display_text += f"Size: {item['Size']}, Toppings: {', '.join(item['Toppings'])}, Style: {item['Style']}, Crust: {item['Crust']}, Quantity: {item['Quantity']}\n"
+        self.cart_items_text.set(cart_display_text)
+
+
     # resets the UI after ordering
     def reset_ui(self):
         self.size_var.set("")
@@ -292,7 +341,9 @@ class PizzaOrderApp:
         self.style_var.set("")
         self.crust_var.set("")
         self.selected_items_text.set("")
+        self.cart_items_text.set("")
         self.quantity_var.set(1)
+
 
         # Reset button colors
         for widget in self.master.winfo_children():
