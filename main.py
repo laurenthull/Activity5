@@ -49,13 +49,23 @@ class PizzaOrderApp:
                 button.config(bg="SystemButtonFace")
 
         self.buttons_size = []
+
         # Fetch sizes from the database
         self.size_options = self.get_db_options("PizzaSizes", "SizeName")
         for i, size in enumerate(self.size_options):
-            btn = tk.Button(master, text=size, font=("Helvetica", 16), command=lambda s=size: self.select_option("size", s), width=18, height=5)
-            btn.grid(row=0, column=i+1, sticky="w")
-            btn.bind("<Button-1>", lambda event, b=btn: (reset_button_colors(self.buttons_size), b.config(bg="green2")))
-            self.buttons_size.append(btn)  # Store the button in the list
+            image_path = f"C:/Users/luke/Documents/GitHub/Activity5/images/{size}.jpg"  # Adjust the path for your folder structure
+            image = Image.open(image_path)
+            image = image.resize((125, 125))  # Resize the image
+            photo_image = ImageTk.PhotoImage(image)
+            btn = tk.Button(master, image=photo_image, compound=tk.TOP,
+                            command=lambda s=size: self.select_option("size", s), font=("Helvetica", 16), width=218,
+                            height=150)
+            btn.image = photo_image  # Keep a reference to the image
+            btn.grid(row= 0, column=i + 1, sticky="w")
+            btn.config(bg="SystemButtonFace")  # Set initial color
+            btn.bind("<Button-1>",
+                     lambda event, b=btn: (reset_button_colors(self.buttons_size), b.config(bg="green2")))
+            self.buttons_size.append(btn)  # Store the button and its state
 
 
         # Initialize toppings
@@ -75,31 +85,24 @@ class PizzaOrderApp:
             else:
                 button.config(bg="green2")
 
+        ######topping buttons###########
         self.buttons_toppings = {}
 
         for i, option in enumerate(self.topping_options):
             image_path = f"C:/Users/luke/Documents/GitHub/Activity5/images/{option}.jpg"  # Adjust the path for your folder structure
-            try:
-                if os.path.exists(image_path):
-                    image = Image.open(image_path)
-                    image = image.resize((125, 125))  # Resize the image
-                    photo_image = ImageTk.PhotoImage(image)
-                    btn = tk.Button(master, image=photo_image, text=option, compound=tk.TOP, font=("Helvetica", 16),
-                                    command=lambda idx=i: self.toggle_topping(idx), width=218, height=150)
-                    btn.image = photo_image  # Keep a reference to the image
-                    btn.grid(row=1, column=i+1, sticky="w")
-                    btn.config(bg="SystemButtonFace")  # Set initial color
-                    btn.bind("<Button-1>", lambda event, b=btn: toggle_button(b))  # Toggle color on click
-                    self.buttons_toppings[option] = btn  # Store the button and its state
+            image = Image.open(image_path)
+            image = image.resize((125, 125))  # Resize the image
+            photo_image = ImageTk.PhotoImage(image)
+            btn = tk.Button(master, image=photo_image, text=option, compound=tk.TOP, font=("Helvetica", 16),
+                            command=lambda idx=i: self.toggle_topping(idx), width=218, height=150)
+            btn.image = photo_image  # Keep a reference to the image
+            btn.grid(row=1, column=i+1, sticky="w")
+            btn.config(bg="SystemButtonFace")  # Set initial color
+            btn.bind("<Button-1>", lambda event, b=btn: toggle_button(b))  # Toggle color on click
+            self.buttons_toppings[option] = btn  # Store the button and its state
 
 
-                else:
-                    raise FileNotFoundError(f"Image not found: {image_path}")
-            except Exception as e:
-                print(f"Error loading image for {option}: {e}")
-                btn = tk.Button(master, text=option, font=("Helvetica", 16),
-                                command=lambda idx=i: self.toggle_topping(idx), width=18, height=5)
-                btn.grid(row=i + 1, column=1, sticky="w")
+
 
         # Pizza style
         style_label = tk.Label(master, bg="white", text="Style:", font=("Helvetica", 16))
@@ -109,12 +112,18 @@ class PizzaOrderApp:
         self.buttons_style = []
         self.style_options = self.get_db_options("PizzaStyles", "StyleName")
         for i, style in enumerate(self.style_options):
-            btn = tk.Button(master, text=style, font=("Helvetica", 16), command=lambda s=style: self.select_option("style", s), width=18, height=5)
+            image_path = f"C:/Users/luke/Documents/GitHub/Activity5/images/{style}.jpeg"  # Adjust the path for your folder structure
+            image = Image.open(image_path)
+            image = image.resize((125, 125))  # Resize the image
+            photo_image = ImageTk.PhotoImage(image)
+            btn = tk.Button(master, image=photo_image, text=style, compound=tk.TOP, command=lambda s=style: self.select_option("style", s), font=("Helvetica", 16),width=218, height=150)
+            btn.image = photo_image  # Keep a reference to the image
             btn.grid(row=len(self.size_options) + 2, column=i+1, sticky="w")
-            btn.bind("<Button-1>", lambda event, b=btn: (reset_button_colors(self.buttons_style), b.config(bg="green2")))
-            self.buttons_style.append(btn)
+            btn.config(bg="SystemButtonFace")  # Set initial color
+            btn.bind("<Button-1>",lambda event, b=btn: (reset_button_colors(self.buttons_style), b.config(bg="green2")))
+            self.buttons_style.append(btn) # Store the button and its state
 
-            # Crust type
+            # Crust typed
         crust_label = tk.Label(master, bg="white", text="Crust:", font=("Helvetica", 16))
         crust_label.grid(row=len(self.size_options) + 3, column=0, sticky="w",padx=25)
 
@@ -122,10 +131,19 @@ class PizzaOrderApp:
         # Fetch crusts from the database
         self.crust_options = self.get_db_options("CrustTypes", "CrustName")
         for i, crust in enumerate(self.crust_options):
-            btn = tk.Button(master, text=crust, font=("Helvetica", 16), command=lambda c=crust: self.select_option("crust", c), width=18, height=5)
-            btn.grid(row=len(self.size_options) + 3, column=i+1, sticky="w")
-            btn.bind("<Button-1>", lambda event, b=btn: (reset_button_colors(self.buttons_crust), b.config(bg="green2")))
-            self.buttons_crust.append(btn)
+            image_path = f"C:/Users/luke/Documents/GitHub/Activity5/images/{crust}.jpg"  # Adjust the path for your folder structure
+            image = Image.open(image_path)
+            image = image.resize((125, 125))  # Resize the image
+            photo_image = ImageTk.PhotoImage(image)
+            btn = tk.Button(master, image=photo_image, text=crust, compound=tk.TOP,
+                            command=lambda c=crust: self.select_option("crust", c), font=("Helvetica", 16), width=218,
+                            height=150)
+            btn.image = photo_image  # Keep a reference to the image
+            btn.grid(row=len(self.size_options) + 3, column=i + 1, sticky="w")
+            btn.config(bg="SystemButtonFace")  # Set initial color
+            btn.bind("<Button-1>",
+                     lambda event, b=btn: (reset_button_colors(self.buttons_style), b.config(bg="green2")))
+            self.buttons_crust.append(btn)  # Store the button and its state
         # Quantity
         quantity_label = tk.Label(master,bg="white", text="Quantity:", font=("Helvetica", 16))
         quantity_label.grid(row=len(self.size_options) + 4, column=0, sticky="w",padx=25)
@@ -331,6 +349,7 @@ class PizzaOrderApp:
         for item in self.cart_items:
             cart_display_text += f"Size: {item['Size']}, Toppings: {', '.join(item['Toppings'])}, Style: {item['Style']}, Crust: {item['Crust']}, Quantity: {item['Quantity']}\n"
         self.cart_items_text.set(cart_display_text)
+        self.reset_ui()
 
 
     # resets the UI after ordering
@@ -341,7 +360,6 @@ class PizzaOrderApp:
         self.style_var.set("")
         self.crust_var.set("")
         self.selected_items_text.set("")
-        self.cart_items_text.set("")
         self.quantity_var.set(1)
 
 
