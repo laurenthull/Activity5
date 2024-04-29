@@ -49,7 +49,7 @@ class PizzaOrderApp:
 
 
         for i, size in enumerate(self.size_options):
-            image_path = f"C:/Users/luke/Documents/GitHub/Activity5/images/{size}.jpg"
+            image_path = f"images/{size}.jpg"
             image = Image.open(image_path)
             image = image.resize((125, 125))
             photo_image = ImageTk.PhotoImage(image)
@@ -83,7 +83,7 @@ class PizzaOrderApp:
         self.buttons_toppings = {}
 
         for i, option in enumerate(self.topping_options):
-            image_path = f"C:/Users/luke/Documents/GitHub/Activity5/images/{option}.jpg"
+            image_path = f"images/{size}.jpg"
             image = Image.open(image_path)
             image = image.resize((125, 125))
             photo_image = ImageTk.PhotoImage(image)

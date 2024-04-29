@@ -7,10 +7,11 @@ db = mongo_client["pizza_database"]
 
 # Data to insert into collections
 pizza_sizes = [
-    {"SizeID": 1, "SizeName": "Small", "Price": 8.99},
-    {"SizeID": 2, "SizeName": "Medium", "Price": 10.99},
-    {"SizeID": 3, "SizeName": "Large", "Price": 12.99},
-    {"SizeID": 4, "SizeName": "Extra Large", "Price": 14.99}
+    {"SizeID": 1, "SizeName": "Personal", "Price": 7.00},
+    {"SizeID": 2, "SizeName": "Small", "Price": 8.99},
+    {"SizeID": 3, "SizeName": "Medium", "Price": 10.99},
+    {"SizeID": 4, "SizeName": "Large", "Price": 12.99},
+    {"SizeID": 5, "SizeName": "Extra Large", "Price": 14.99}
 ]
 
 toppings = [
@@ -22,14 +23,17 @@ toppings = [
 ]
 
 pizza_styles = [
-    {"StyleID": 1, "StyleName": "New York", "Price": 0.00},
-    {"StyleID": 2, "StyleName": "Chicago", "Price": 0.00},
-    {"StyleID": 3, "StyleName": "Flatbread", "Price": 0.00}
+    {"StyleID": 1, "StyleName": 'New York', "Price": 0.00 },
+    {"StyleID": 2, "StyleName": 'French Bread', "Price": 0.00 },
+    {"StyleID": 3, "StyleName": 'Chicago', "Price": 0.00 },
+    {"StyleID": 4, "StyleName": 'Flatbread', "Price": 0.00 }
 ]
 
 crust_types = [
     {"CrustID": 1, "CrustName": "Plain", "Price": 0.00},
-    {"CrustID": 2, "CrustName": "Stuffed", "Price": 2.00}
+    {"CrustID": 2, "CrustName": "Stuffed", "Price": 2.00},
+    {"CrustID": 3, "CrustName": "Thin", "Price": 0.00},
+    {"CrustID": 4, "CrustName": "Pan", "Price": 2.00}
 ]
 
 pizzas = [
