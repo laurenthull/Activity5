@@ -205,23 +205,18 @@ class PizzaOrderApp:
         self.update_selected_items()
 
     def calculate_total(self):
-        size_price = self.get_price("pizza_sizes", "SizeName", self.size_var.get())
+        total_price = 0
 
-        # Check if the length of topping_options matches the length of topping_vars
+        for item in self.cart_items:
+            size_price = self.get_price("pizza_sizes", "SizeName", item["Size"])
+            topping_prices = sum(self.get_price("toppings", "ToppingName", topping) for topping in item["Toppings"])
+            style_price = self.get_price("pizza_styles", "StyleName", item["Style"])
+            crust_price = self.get_price("crust_types", "CrustName", item["Crust"])
+            item_total_price = (size_price + topping_prices + style_price + crust_price) * item["Quantity"]
+            total_price += item_total_price
 
-
-
-            # Iterate over topping_options and topping_vars simultaneously
-        topping_prices = sum(
-                self.get_price("toppings", "ToppingName", topping)
-                for topping, var in zip(self.topping_options, self.topping_vars)
-                if var.get() == 1)
-
-
-        style_price = self.get_price("pizza_styles", "StyleName", self.style_var.get())
-        crust_price = self.get_price("crust_types", "CrustName", self.crust_var.get())
-        total_price = (size_price + topping_prices + style_price + crust_price) * self.quantity_var.get()
         self.total_price_label.config(text="Total Price: $%.2f" % total_price)
+
     def add_to_cart(self):
         size = self.size_var.get()
         toppings = [self.topping_options[i] for i, var in enumerate(self.topping_vars) if var.get() == 1]
@@ -325,6 +320,7 @@ class PizzaOrderApp:
             cart_display_text += f"Size: {item['Size']}, Toppings: {', '.join(item['Toppings'])}, Style: {item['Style']}, Crust: {item['Crust']}, Quantity: {item['Quantity']}\n"
         self.cart_items_text.set(cart_display_text)
         self.reset_ui()
+        self.calculate_total()
 
     def reset_ui(self):
         self.size_var.set("")
