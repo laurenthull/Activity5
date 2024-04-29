@@ -5,6 +5,14 @@ from datetime import datetime
 mongo_client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = mongo_client["pizza_database"]
 
+# Delete documents from collections
+db.pizza_sizes.delete_many({})
+db.toppings.delete_many({})
+db.pizza_styles.delete_many({})
+db.crust_types.delete_many({})
+db.pizzas.delete_many({})
+db.sales.delete_many({})
+
 # Data to insert into collections
 pizza_sizes = [
     {"SizeID": 1, "SizeName": "Personal", "Price": 7.00},
