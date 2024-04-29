@@ -83,7 +83,7 @@ class PizzaOrderApp:
         self.buttons_toppings = {}
 
         for i, option in enumerate(self.topping_options):
-            image_path = f"images/{size}.jpg"
+            image_path = f"images/{option}.jpg"
             image = Image.open(image_path)
             image = image.resize((125, 125))
             photo_image = ImageTk.PhotoImage(image)
@@ -143,13 +143,14 @@ class PizzaOrderApp:
         self.quantity_entry.grid(row=len(self.size_options) + 4, column=1, sticky="w")
 
         # Total price label
-        self.total_price_label = tk.Label(master,bg="white", text="Total Price: $0.00", font=("Helvetica", 16))
-        self.total_price_label.grid(row=len(self.size_options) + 5, column=0, columnspan=6, pady=10)
+        self.total_price_label = tk.Label(master,bg="white", text="Total Price: $0.00", font=("Helvetica", 20))
+        self.total_price_label.grid(row=len(self.size_options) + 3, column=5, columnspan=6, pady=10)
 
         # Sale button
-        sale_button = tk.Button(master, text="Apply Sale", font=("Helvetica", 16), command=self.apply_sale_price)
+        sale_button = tk.Button(master, text="Apply Sale (15% Off)", font=("Helvetica", 16), command=self.apply_sale_price, width=20, height=7, highlightbackground= "red", fg="red")
         sale_button.bind("<Button-1>", lambda event, b=sale_button: b.config(bg="green2"))
-        sale_button.grid(row=len(self.size_options) + 4, column=3, sticky="w")
+        sale_button.grid(row=len(self.size_options) + 2, column=5, sticky="w")
+
 
         # Order button
         order_button = tk.Button(master, text="Place Order", font=("Helvetica", 16), command=self.place_order)
